@@ -7,20 +7,17 @@ Page({
     hidden: false
   },
   fetchData(cb) {
-    var that = this;
-    that.setData({
+    this.setData({
       hidden: false
     })
     wx.request({
       url: getLatestTopics({page: 1}),
-      success(res) {
-        that.setData({
-          latest: res.data
+      success: (res) => {
+        this.setData({
+          latest: res.data,
+          hidden: true
         })
-        setTimeout(() => {
-          that.setData({ hidden: true })
-          cb();
-        }, 300)
+          cb()
       }
     })
   },

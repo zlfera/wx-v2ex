@@ -1,11 +1,52 @@
 //app.js
 App({
-  onLaunch: function () {
+  onLaunch() {
     // 展示本地存储能力
-    var logs = wx.getStorageSync('logs') || []
+    let logs = wx.getStorageSync('logs') || []
     logs.unshift(Date.now())
     wx.setStorageSync('logs', logs)
 
+    //
+    wx.getNetworkType({
+      success: (res) => {
+        const networkType = res.networkType
+        if (networkType === 'none') {
+          this.globalData.isConnected = false
+          wx.showToast({
+            title: '当前无网络',
+            icon: 'loading',
+            duration: 2000
+          })
+        }
+      }
+    }),
+    goStartIndexPage: () => {
+      setTimeout(() => {
+      wx.redirectTo({
+        url: "/pages/hotest/hotest"
+      })
+      }, 1000)
+    },
+     /**
+     * 监听网络状态变化
+     * 可根据业务需求进行调整
+     */
+    wx.onNetworkStatusChange((res) => {
+      if (!res.isConnected) {
+        this.globalData.isConnected = false
+        wx.showToast({
+          title: '网络已断开',
+          icon: 'loading',
+          duration: 2000,
+          complete: () => {
+            this.goStartIndexPage()
+          }
+        })
+      } else{
+        this.globalData.isConnected = true
+        wx.hideToast()
+      }
+    }),
     // 登录
     wx.login({
       success: res => {
@@ -18,7 +59,6 @@ App({
         if (res.authSetting['scope.userInfo']) {
           // 已经授权，可以直接调用 getUserInfo 获取头像昵称，不会弹框
           wx.getUserInfo({
-            success: res => {
               // 可以将 res 发送给后台解码出 unionId
               this.globalData.userInfo = res.userInfo
 
@@ -29,11 +69,11 @@ App({
               }
             }
           })
-        }
       }
     })
   },
   globalData: {
-    userInfo: null
+    userInfo: null,
+    isConnected: true
   }
 })
